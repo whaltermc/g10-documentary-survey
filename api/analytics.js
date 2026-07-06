@@ -6,9 +6,8 @@ function normalizePrivateKey(key) {
   if (key.startsWith('"') && key.endsWith('"')) {
     key = key.slice(1, -1)
   }
-  key = key.replace(/\\\\n/g, '
-')
-  key = key.replace(/\\n/g, '
+  // Replace literal backslash-n (two chars) with actual newline
+  key = key.split('\\n').join('
 ')
   return key
 }
@@ -18,16 +17,11 @@ function getDb() {
     const rawKey = process.env.FIREBASE_PRIVATE_KEY || ''
     const privateKey = normalizePrivateKey(rawKey)
 
-    console.log('=== FIREBASE KEY DEBUG ===')
-    console.log('Raw length:', rawKey.length)
-    console.log('Normalized length:', privateKey.length)
+    console.log('Key length:', privateKey.length)
     console.log('Has BEGIN:', privateKey.includes('-----BEGIN PRIVATE KEY-----'))
-    console.log('Has END:', privateKey.includes('-----END PRIVATE KEY-----'))
-    console.log('First 50:', JSON.stringify(privateKey.substring(0, 50)))
-    console.log('===========================')
 
     if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('FIREBASE_PRIVATE_KEY invalid. Got: ' + JSON.stringify(rawKey.substring(0, 80)))
+      throw new Error('FIREBASE_PRIVATE_KEY invalid')
     }
 
     if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL) {
@@ -41,7 +35,7 @@ function getDb() {
         privateKey: privateKey
       })
     })
-    console.log('Firebase Admin initialized successfully')
+    console.log('Firebase Admin initialized')
   }
   return getFirestore()
 }

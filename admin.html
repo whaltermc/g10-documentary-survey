@@ -11,6 +11,7 @@
   <h1>Response Analytics</h1>
   <p class="sub">A live view of everyone's answers to the check-in.</p>
 
+  <!-- Login gate: shown until an admin signs in -->
   <div class="card" id="loginScreen">
     <h2 style="margin:0 0 16px;">Admin sign-in</h2>
     <input type="password" id="adminPassword" placeholder="Password" autocomplete="current-password"
@@ -19,9 +20,10 @@
     <div class="status" id="loginStatus"></div>
   </div>
 
+  <!-- Everything below only shows after successful sign-in -->
   <div id="analyticsWrap" style="display:none;">
     <div class="privacy-note">
-      ⚠️ This page shows raw, unfiltered responses including free-text reflections. It's gated behind admin sign-in — don't share your password.
+      ⚠️ This page shows raw, unfiltered responses including free-text reflections. It's now gated behind admin sign-in — don't share your password.
     </div>
 
     <div class="actions" style="margin-bottom:20px;">

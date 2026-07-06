@@ -80,6 +80,8 @@ button:disabled{ opacity:.4; cursor:not-allowed; }
   padding:26px;
 }
 
+/* ── Survey page ──────────────────────────────────────────────── */
+
 body.page-survey{
   min-height:100vh;
   display:flex;
@@ -224,6 +226,8 @@ textarea:focus, label.opt:focus-within{
   justify-content:flex-end;
   gap:10px;
 }
+
+/* ── Analytics page ───────────────────────────────────────────── */
 
 body.page-analytics{ padding:40px 20px; }
 
