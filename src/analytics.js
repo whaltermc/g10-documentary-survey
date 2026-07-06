@@ -59,7 +59,6 @@ export function initAnalytics() {
         body: JSON.stringify({ password })
       })
 
-      // Log for debugging
       console.log('API response status:', res.status)
 
       if (!res.ok) {

@@ -1,23 +1,37 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 
+function normalizePrivateKey(key) {
+  key = key.trim()
+  if (key.startsWith('"') && key.endsWith('"')) {
+    key = key.slice(1, -1)
+  }
+  key = key.replace(/\\\\n/g, '
+')
+  key = key.replace(/\\n/g, '
+')
+  return key
+}
+
 function getDb() {
   if (getApps().length === 0) {
-    // Fix private key formatting - handle both 
- literal and actual newlines
-    let privateKey = process.env.FIREBASE_PRIVATE_KEY || ''
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '
-')
-    } else if (!privateKey.includes('-----BEGIN')) {
-      // If it's base64 encoded, decode it
-      try {
-        privateKey = Buffer.from(privateKey, 'base64').toString('utf-8')
-      } catch (e) {}
+    const rawKey = process.env.FIREBASE_PRIVATE_KEY || ''
+    const privateKey = normalizePrivateKey(rawKey)
+
+    console.log('=== FIREBASE KEY DEBUG ===')
+    console.log('Raw length:', rawKey.length)
+    console.log('Normalized length:', privateKey.length)
+    console.log('Has BEGIN:', privateKey.includes('-----BEGIN PRIVATE KEY-----'))
+    console.log('Has END:', privateKey.includes('-----END PRIVATE KEY-----'))
+    console.log('First 50:', JSON.stringify(privateKey.substring(0, 50)))
+    console.log('===========================')
+
+    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+      throw new Error('FIREBASE_PRIVATE_KEY invalid. Got: ' + JSON.stringify(rawKey.substring(0, 80)))
     }
 
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !privateKey) {
-      throw new Error('Missing Firebase Admin credentials. Check FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY env vars.')
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL) {
+      throw new Error('Missing FIREBASE_PROJECT_ID or FIREBASE_CLIENT_EMAIL')
     }
 
     initializeApp({
@@ -27,12 +41,12 @@ function getDb() {
         privateKey: privateKey
       })
     })
+    console.log('Firebase Admin initialized successfully')
   }
   return getFirestore()
 }
 
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -69,8 +83,7 @@ export default async function handler(req, res) {
     console.error('Analytics error:', err)
     return res.status(500).json({ 
       error: 'Failed to fetch data', 
-      details: err.message,
-      stack: err.stack 
+      details: err.message 
     })
   }
 }
