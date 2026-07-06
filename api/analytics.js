@@ -7,8 +7,7 @@ function getDb() {
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\n/g, '
-')
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
       })
     })
   }
@@ -16,6 +15,15 @@ function getDb() {
 }
 
 export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end()
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -44,6 +52,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ responses })
   } catch (err) {
     console.error('Analytics error:', err)
-    return res.status(500).json({ error: 'Failed to fetch data' })
+    return res.status(500).json({ error: 'Failed to fetch data', details: err.message })
   }
 }
