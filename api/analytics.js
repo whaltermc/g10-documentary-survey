@@ -1,43 +1,45 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+// Use Firebase REST API - no Admin SDK needed
+// Requires: FIREBASE_PROJECT_ID and VITE_FIREBASE_API_KEY env vars
+// Firestore rules must allow reads
 
-function normalizePrivateKey(key) {
-  key = key.trim()
-  if (key.startsWith('"') && key.endsWith('"')) {
-    key = key.slice(1, -1)
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'lowkeychat-4d82f'
+const API_KEY = process.env.VITE_FIREBASE_API_KEY || ''
+
+async function fetchFirestore() {
+  const baseUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/responses`
+
+  // Add API key as query param
+  const url = API_KEY ? `${baseUrl}?key=${API_KEY}` : baseUrl
+
+  console.log('Fetching from:', url.replace(API_KEY, '***'))
+
+  const res = await fetch(url)
+  const text = await res.text()
+
+  if (!res.ok) {
+    console.error('Firestore API error:', res.status, text)
+    throw new Error(`Firestore API error ${res.status}: ${text}`)
   }
-  // Replace literal backslash-n (two chars) with actual newline
-  key = key.split('\\n').join('
-')
-  return key
+
+  const data = JSON.parse(text)
+  return data.documents || []
 }
 
-function getDb() {
-  if (getApps().length === 0) {
-    const rawKey = process.env.FIREBASE_PRIVATE_KEY || ''
-    const privateKey = normalizePrivateKey(rawKey)
+function convertDoc(doc) {
+  const fields = doc.fields || {}
+  const result = {}
 
-    console.log('Key length:', privateKey.length)
-    console.log('Has BEGIN:', privateKey.includes('-----BEGIN PRIVATE KEY-----'))
-
-    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('FIREBASE_PRIVATE_KEY invalid')
+  for (const [key, value] of Object.entries(fields)) {
+    if (value.stringValue !== undefined) {
+      result[key] = value.stringValue
+    } else if (value.arrayValue && value.arrayValue.values) {
+      result[key] = value.arrayValue.values.map(v => v.stringValue || '')
+    } else if (value.timestampValue) {
+      result[key] = value.timestampValue
     }
-
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL) {
-      throw new Error('Missing FIREBASE_PROJECT_ID or FIREBASE_CLIENT_EMAIL')
-    }
-
-    initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: privateKey
-      })
-    })
-    console.log('Firebase Admin initialized')
   }
-  return getFirestore()
+
+  return result
 }
 
 export default async function handler(req, res) {
@@ -57,20 +59,8 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    const db = getDb()
-    const snapshot = await db.collection('responses')
-      .orderBy('createdAt', 'desc')
-      .get()
-
-    const responses = snapshot.docs.map(doc => {
-      const data = doc.data()
-      return {
-        ...data,
-        createdAt: data.createdAt?.toDate?.()
-          ? data.createdAt.toDate().toISOString()
-          : data.createdAt
-      }
-    })
+    const docs = await fetchFirestore()
+    const responses = docs.map(convertDoc)
 
     return res.status(200).json({ responses })
   } catch (err) {
