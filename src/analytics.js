@@ -116,7 +116,6 @@ export function initAnalytics() {
     }
   }
 
-  // Login gate
   const loginScreen = document.getElementById('loginScreen')
   const analyticsWrap = document.getElementById('analyticsWrap')
   const passwordInput = document.getElementById('adminPassword')

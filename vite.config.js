@@ -6,17 +6,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   build: {
-      outDir: 'dist',
-          emptyOutDir: true,
-              rollupOptions: {
-                    input: {
-                            main: resolve(__dirname, 'index.html'),
-                                    admin: resolve(__dirname, 'admin.html'),
-                                          },
-                                              },
-                                                },
-                                                  server: {
-                                                      port: 3000,
-                                                        }
-                                                        })
-                                                        
+    outDir: 'dist',
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'src/pages/index.html'),
+        admin: resolve(__dirname, 'src/pages/admin.html'),
+      },
+    },
+  },
+  server: {
+    port: 3000,
+  }
+})

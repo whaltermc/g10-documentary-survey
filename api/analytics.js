@@ -1,14 +1,14 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 
-// Initialize Firebase Admin SDK (server-side only, uses service account)
 function getDb() {
   if (getApps().length === 0) {
     initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\n/g, '\n')
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\n/g, '
+')
       })
     })
   }
@@ -16,12 +16,10 @@ function getDb() {
 }
 
 export default async function handler(req, res) {
-  // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  // Check admin password
   const { password } = req.body || {}
   if (!password || password !== process.env.ANALYTICS_API_KEY) {
     return res.status(401).json({ error: 'Unauthorized' })
@@ -35,11 +33,10 @@ export default async function handler(req, res) {
 
     const responses = snapshot.docs.map(doc => {
       const data = doc.data()
-      // Convert Firestore timestamps to ISO strings for JSON
       return {
         ...data,
-        createdAt: data.createdAt?.toDate?.() 
-          ? data.createdAt.toDate().toISOString() 
+        createdAt: data.createdAt?.toDate?.()
+          ? data.createdAt.toDate().toISOString()
           : data.createdAt
       }
     })
