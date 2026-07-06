@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Quiet Check-In</title>
+</head>
+<body class="page-survey">
+<div class="wrap">
+  <div class="eyebrow">A quiet check-in</div>
+  <h1>Three honest questions</h1>
+  <p class="sub">This isn't a test. There's no wrong answer — just answer as truthfully as you can. Responses are saved anonymously for the aggregate results.</p>
+
+  <div class="card">
+    <div class="progress">
+      <span id="p1" class="done"></span>
+      <span id="p2"></span>
+      <span id="p3"></span>
+    </div>
+
+    <div class="step active" id="step1">
+      <div class="qnum">Question 1 of 3</div>
+      <p class="question">What kind of bad habits do you have?</p>
+      <div class="options">
+        <label class="opt"><input type="checkbox" name="q1" value="Vaping"> Vaping</label>
+        <label class="opt"><input type="checkbox" name="q1" value="Cigarettes"> Cigarettes</label>
+        <label class="opt"><input type="checkbox" name="q1" value="Alcohol drinking"> Alcohol drinking</label>
+        <label class="opt"><input type="checkbox" name="q1" value="None of these"> None of these</label>
+      </div>
+      <div class="actions"><button class="btn-next" id="next1" disabled>Next</button></div>
+    </div>
+
+    <div class="step" id="step2">
+      <div class="qnum">Question 2 of 3</div>
+      <p class="question">Who introduced this habit to you?</p>
+      <div class="options">
+        <label class="opt"><input type="radio" name="q2" value="Friends"> Friends</label>
+        <label class="opt"><input type="radio" name="q2" value="Family"> Family</label>
+        <label class="opt"><input type="radio" name="q2" value="No one"> No one — I started it on my own</label>
+      </div>
+      <div class="actions">
+        <button class="btn-back" id="back2">Back</button>
+        <button class="btn-next" id="next2" disabled>Next</button>
+      </div>
+    </div>
+
+    <div class="step" id="step3">
+      <div class="qnum">Question 3 of 3</div>
+      <p class="question">Why can't you stop doing it? Or, how did you stop doing it?</p>
+      <textarea id="q3" placeholder="Write freely — a sentence or a paragraph, whatever feels true."></textarea>
+      <div class="actions">
+        <button class="btn-back" id="back3">Back</button>
+        <button class="btn-next" id="next3">Finish</button>
+      </div>
+      <div class="status" id="status3"></div>
+    </div>
+
+    <div class="step done-screen" id="stepDone">
+      <h2>Thanks for being honest.</h2>
+      <p>That kind of honesty — even just to yourself — is worth something.</p>
+      <div class="summary" id="summaryBox"></div>
+      <p class="note">If any of this feels heavier than you expected, it might help to talk to someone you trust, or a counselor.</p>
+      <div class="actions"><button class="btn-back" id="restart">Start over</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation modal -->
+<div class="modal-overlay" id="confirmOverlay">
+  <div class="modal-box">
+    <h3>Submit your answers?</h3>
+    <p>Once submitted, you won't be able to edit this response. Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn-back" id="confirmCancel">Go back</button>
+      <button class="btn-next" id="confirmSubmit">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
