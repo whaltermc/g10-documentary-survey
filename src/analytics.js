@@ -26,7 +26,7 @@ export function initAnalytics() {
       row.className = 'bar-row'
       row.innerHTML = `
         <div class="bar-label"><span>${label}</span><span class="count">${count} · ${pct}%</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${colorMap[label] || 'var(--accent)'}"></div></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${colorMap[label] || 'var(--accent)'};"></div></div>
       `
       container.appendChild(row)
     })
@@ -59,12 +59,23 @@ export function initAnalytics() {
         body: JSON.stringify({ password })
       })
 
+      // Log for debugging
+      console.log('API response status:', res.status)
+
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.error || `Server error: ${res.status}`)
+        const errText = await res.text()
+        console.error('API error response:', errText)
+        let errMsg = `Server error: ${res.status}`
+        try {
+          const errJson = JSON.parse(errText)
+          errMsg = errJson.error || errMsg
+        } catch (e) {}
+        throw new Error(errMsg)
       }
 
       const data = await res.json()
+      console.log('API data:', data)
+
       const docs = data.responses || []
       const total = docs.length
 
@@ -110,9 +121,9 @@ export function initAnalytics() {
       loading.style.display = 'none'
       content.style.display = 'block'
     } catch (err) {
-      console.error(err)
+      console.error('Load data error:', err)
       loading.className = 'status error'
-      loading.textContent = err.message || "Couldn't load responses."
+      loading.textContent = err.message || "Couldn't load responses. Check console for details."
     }
   }
 
