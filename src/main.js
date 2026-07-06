@@ -1,4 +1,4 @@
-import '../style.css'
+import './style.css'
 import { initSurvey } from './survey.js'
 import { initAnalytics } from './analytics.js'
 
